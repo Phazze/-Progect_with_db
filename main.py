@@ -15,7 +15,7 @@ try:
 
     try:
         with mydb.cursor() as cursor:
-            cursor.execute("SELECT * from connect;")
+            cursor.execute("SHOW DATABASES;")
             print(cursor.fetchall())
     finally:
         mydb.close()
