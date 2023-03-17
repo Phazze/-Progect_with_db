@@ -1,36 +1,40 @@
 import pymysql
+# import _mysql_connector
 from auth import user, password, database, host
 
 
-class MySQL():
-    try:
-        mydb = pymysql.connect(
-            host=host,
-            password=password,
-            port=3306,
-            user=user,
-            database=database
-        )
-        print("all good")
-        print("######" * 10)
-    except Exception as ex:
-        print("Connection failed....")
-        print(ex)
-class deistvie(MySQL):
-    def vxod(self, mydb):
+class MySQL(object):
+
+    def __init__(self, host, password, port, user, database):
+        try:
+            self.mydb = pymysql.connect(
+                host=host,
+                password=password,
+                port=port,
+                user=user,
+                database=database,
+                # cursorclass= pymysql.cursors.DictCursor
+            )
+            print("all good")
+            print("######" * 10)
+        except Exception as ex:
+            print("Connection failed....")
+            print(ex)
+    def vxod(self):
         print("Input login: ")
         login = str(input())
         print("Input password: ")
         user_password = str(input())
         try:
-            with mydb.cursor() as cursor:
-                sql_zapros = f"SELECT first_name, Last_name, age, informachion from users, connect where connect.login = '{login}' and connect.password = '{user_password}' and connect.id = users.fk_id;"
+            with self.mydb.cursor() as cursor:
+                sql_zapros = f"SELECT first_name, Last_name, age, information from users, connect where connect.login = '{login}' and connect.password = '{user_password}' and connect.id = users.fk_id;"
                 cursor.execute(sql_zapros)
                 vivod = cursor.fetchall()
                 print(vivod)
         finally:
-            mydb.close()
-    def register(self,mydb):
+            self.mydb.close()
+
+    def register(self):
         print("Input your name:")
         name = str(input())
         print("Input your last name:")
@@ -47,32 +51,21 @@ class deistvie(MySQL):
         user_password2 = str(input())
         if user_password == user_password2:
             try:
-                with mydb.cursor as cursor:
-                    sql_zapros=(f""" INSERT connect(login, password) VALUES ({login}, {user_password});
-                    INSERT users(first_name, last_name, age, information, fk_id ) VALUES ({name}, {last_name}, {age}, {information}, fk_id = connect.id);""")
+                with self.mydb.cursor() as cursor:
+                    sql_zapros = f"INSERT connect(login, password) VALUES ('{login}', '{user_password}');"
+                    sql_zapros2 = f"INSERT users(first_name, last_name, age, information, login) VALUES ('{name}', '{last_name}', {age}, '{information}', '{login}');"
+                    sql_dop = f"UPDATE users set fk_id = (SELECT id from connect where connect.login = users.login);"
                     cursor.execute(sql_zapros)
-                    cursor.commit()
+                    self.mydb.commit()
+                    cursor.execute(sql_zapros2)
+                    cursor.execute(sql_dop)
+                    self.mydb.commit()
+            except Exception as er:
+                print(er)
             finally:
-                mydb.close()
-
-if __name__ == "__main__":
-    mydb = pymysql.connect(
-        host=host,
-        password=password,
-        port=3306,
-        user=user,
-        database=database
-    )
-    deistvie.register(mydb = mydb, self=deistvie)
+                self.mydb.close()
 
 
-
-
-
-
-
-
-
-
-
+q= MySQL(host = host, port = 3306, password = password, database= database, user = user,)
+q.register()
 
